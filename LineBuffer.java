@@ -15,7 +15,7 @@ public class LineBuffer {
         byte[] bytes=new byte[this.size]; //store input stram
         int each_byte; // read from input stream
         while(-1 != (each_byte=in.read())) {
-            bytes[n] = (byte) each_byte;
+            bytes[n++] = (byte) each_byte;
             if (each_byte == '\r' && 0 == flag % 2) {
                 flag++;
             } else if (each_byte == '\n' && 1 == flag % 2) {
@@ -24,7 +24,7 @@ public class LineBuffer {
                     return new String(bytes, 0, n - 2);
                 }
             } else {
-                n++;  //next byte
+                 //next byte
                 flag = 0;
             }
             //overflow

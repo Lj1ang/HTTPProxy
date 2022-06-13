@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 
 
 class ProxyServer{
-    final private int PROXYPORT=10005;
+    final private int WEBPORT=80;
     private Socket client_socket;
 
 
@@ -37,15 +36,17 @@ class ProxyServer{
             if (0 == each_line.length()) {
                 break;
             } else {
-                String[] temp = each_line.split(":");
+                String[] temp = each_line.split(" ");
                 if (temp[0].contains("Host")) {
                     host = temp[1];
                 }
             }
         }
 
+
+
         //proxy
-        Socket proxy_socket = new Socket(host, PROXYPORT);
+        Socket proxy_socket = new Socket(host, WEBPORT);
         InputStream proxy_in = proxy_socket.getInputStream();
         OutputStream proxy_out = proxy_socket.getOutputStream();
         //forward request
@@ -56,14 +57,15 @@ class ProxyServer{
         while (true){
             client_out.write(proxy_in.read());
         }
-
-
-
-
     }
 
 
-
-
-
+    public static void main(String[] args) throws IOException {
+        int port = 9999;
+        ServerSocket server_socket = new ServerSocket(9999);
+        ProxyServer proxy_server = new ProxyServer(server_socket);
+        while (true) {
+            proxy_server.run();
+        }
+    }
 }

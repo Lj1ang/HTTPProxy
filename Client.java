@@ -7,22 +7,20 @@ import java.util.ArrayList;
 
 public class Client {
 
-    public String hostname;
+    public String proxy_ip;
     public int port;
-
-    public Client(String hostname, int port){
-       this.hostname=hostname;
+    public String request_host;
+    public Client(String proxy_ip, int port,String request_host){
+       this.proxy_ip=proxy_ip;
        this.port=port;
+       this.request_host=request_host;
     }
 
     public void work() {
         try {
-            Socket client = new Socket(hostname, port);
+            Socket client = new Socket(proxy_ip, port);
             //output stream -- byte stream
             OutputStream ops=client.getOutputStream();
-            String mAg="hello";
-            ops.write(mAg.getBytes("UTF-8"));
-
             // io stream -- char stream
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(ops));
 
@@ -30,8 +28,8 @@ public class Client {
 
             //read http request file
 
-            System.out.println(compositeRequest(hostname));
-            pw.write(compositeRequest(hostname));
+            System.out.println(compositeRequest(request_host));
+            pw.write(compositeRequest(request_host));
             pw.flush();
 
 
@@ -53,22 +51,22 @@ public class Client {
 
 
 
-    public static String compositeRequest(String hostname){
+    public static String compositeRequest(String request_host){
 
         return "GET / HTTP/1.1\r\n" +
-                "Host: " + hostname + "\r\n" +
+                "Host: " + request_host + "\r\n" +
                 "User-Agent: curl/7.43.0\r\n" +
                 "Accept: */*\r\n\r\n";
     }
 
     public static void main(String[] args){
-        //String hostname="www.baidu.com";
+        String request_host="www.baidu.com";
         //int port = 80;
-        String hostname="120.79.147.165";
+        String proxy_ip="120.79.147.165";
         int port=9999;
         //String hostname="127.0.0.1";
         //int port=10003;
-        Client client=new Client(hostname,port);
+        Client client=new Client(proxy_ip,port,request_host);
         client.work();
 
     }
