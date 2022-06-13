@@ -34,7 +34,7 @@ public class LineBuffer {
                 bytes = new_bytes;
             }
         }
-        return "readLine() error";
+        return null;
     }
 
 }
