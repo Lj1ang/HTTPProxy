@@ -3,6 +3,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
+
+    public void parseRequest(){
+
+    }
+
+
+
+
     public static void main(String[] args) throws IOException {
 
         //创建服务器套接字实例，设置监听端口为2000
