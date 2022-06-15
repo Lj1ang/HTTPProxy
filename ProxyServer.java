@@ -23,7 +23,6 @@ class ProxyServer{
         //proxy
 
         StringBuilder request = new StringBuilder();
-
         //parseRequest(client_in, host, request);
         String each_line = "";
         LineBuffer line_buffer = new LineBuffer(1024);
@@ -53,80 +52,37 @@ class ProxyServer{
         System.out.println("finish parse header");
 
 
-        Socket proxy_socket = new Socket(host, WEBPORT);
-        InputStream proxy_in = proxy_socket.getInputStream();
-        OutputStream proxy_out = proxy_socket.getOutputStream();
-        //forward request
-        proxy_out.write(request.toString().getBytes());
-
-
-        //parse response and save it local
         local_url = "../"+requested_url;
-        parseResponse(proxy_in,local_url);
-
-        // forward all
-        //new ProxyThread(client_in, proxy_out).start();
-        //while (true){
-            //client_out.write(proxy_in.read());
-        //}
-
-        //manually forward
         File file = new File(local_url);
-        long length =file.length();
-        byte[] bytes = new byte[16*1024];
+        // there is a file locally or not
+        if(!file.exists()){
+            Socket proxy_socket = new Socket(host, WEBPORT);
+            InputStream proxy_in = proxy_socket.getInputStream();
+            OutputStream proxy_out = proxy_socket.getOutputStream();
+            //forward request
+            proxy_out.write(request.toString().getBytes());
+            //parse response and save it local
+            parseResponse(proxy_in,local_url);
+        }
+        //manually forward with file
+        System.out.println("start forward to client");
         InputStream file_input_stream = new FileInputStream(file);
         int count;
         while((count = file_input_stream.read()) > 0){
             client_out.write((byte)count);
         }
         client_out.close();
+        while(-1!=client_in.read()){
+
+        }
         client_in.close();
+        client_out.close();
         client_socket.close();
 
-
-        /*
-        File file = new File(local_url);
-        DataInputStream data_input_stream = new DataInputStream(new BufferedInputStream(new FileInputStream(local_url)));
-        DataOutputStream data_output_stream =new DataOutputStream(new BufferedOutputStream(client_out));
-
-        byte[] buf = new byte[1024*16];
-        int len=0;
-        while((len = data_input_stream.read())!=-1){
-            data_output_stream.write(buf,0,len);
-        }
-        data_output_stream.flush();
-        */
-
-        /*
-        int n=0; // s
-        int size =1024;
-        byte[] bytes=new byte[size]; //store input stram
-        int each_byte; // read from input stream
-        while(-1!=(each_byte=data_input_stream.read())){
-            if (size == n+1) {
-                byte[] new_bytes = new byte[2 * size];
-                System.arraycopy(bytes, 0, new_bytes, 0, bytes.length);
-                bytes = new_bytes;
-                size*=2;
-            }
-
-            bytes[n++] = (byte) each_byte;
-        }
-
-        data_output_stream.write(bytes,0,n);
-        */
-
-
-
-        //data_output_stream.flush();
-        //client_out.flush();
         System.out.println("finish forward to client");
         System.out.println("------------");
 
     }
-
-
-
     public static void parseResponse(InputStream proxy_in, String local_url) throws IOException {
         System.out.println("start parse response header");
         StringBuilder header=new StringBuilder();
@@ -165,10 +121,8 @@ class ProxyServer{
         System.out.println("finish parse response body");
 
         writeToFile(new String(bytes), local_url);
-
-
-
     }
+
     public static void writeToFile(String body, String local_url) throws IOException {
         String filename = local_url;
         OutputStream file = new FileOutputStream(filename);
@@ -178,18 +132,11 @@ class ProxyServer{
         file.close();
     }
 
-
-
-
-
-
     public static void main(String[] args) throws IOException{
         int port = 9999;
         ServerSocket server_socket = new ServerSocket(9999);
         ProxyServer proxy_server = new ProxyServer(server_socket);
-
         proxy_server.run();
-
     }
 }
 

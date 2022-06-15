@@ -35,9 +35,10 @@ public class Client {
             local_url=requested_url_array[requested_url_array.length-1];
             InputStream client_in = client.getInputStream();
             parseResponse(client_in,local_url);
-
-
             System.out.println("save done");
+            client_in.close();
+            client_out.close();
+            client.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,32 +56,24 @@ public class Client {
 
     public static void parseResponse(InputStream in, String local_url) throws IOException {
         System.out.println("start parse response header");
-        StringBuilder header=new StringBuilder();
+        StringBuilder header = new StringBuilder();
         String each_line;
         LineBuffer line_buffer = new LineBuffer(3000);
 
-        while(null != (each_line = line_buffer.readLine(in) )){
+        while (null != (each_line = line_buffer.readLine(in))) {
             System.out.println(each_line);
-            header.append(each_line+"\r\n");
+            header.append(each_line + "\r\n");
             // between header and body
             if (each_line.equals(""))
                 break;
         }
         System.out.println("finish parse response header");
 
-
-
-
         System.out.println("start parse response body");
 
-        // body
-        //BufferedReader buffer_reader = new BufferedReader(new InputStreamReader(in));
-        //StringBuilder body = new StringBuilder();
-        //String line = "";
-
-        int n=0; // sequence
+        int n = 0; // sequence
         int size = 1024;
-        byte[] bytes=new byte[size]; //store input stram
+        byte[] bytes = new byte[size]; //store input stram
         int each_byte; // read from input stream
         try {
             while (-1 != (each_byte = in.read())) {
@@ -94,47 +87,17 @@ public class Client {
                 }
                 bytes[n++] = (byte) each_byte;
             }
-        }catch(SocketException e){
-            System.out.println("SocketException");
-        }finally {
+        } catch (SocketException e) {
+            System.out.println(e);
+        } finally {
             System.out.println("finish parse response body");
             writeToFile(new String(bytes), local_url);
-
         }
-/*
-        DataInputStream data_input_stream = new DataInputStream(in);
-        DataOutputStream data_output_stream = new DataOutputStream(new FileOutputStream(local_url));
-        byte[] bytes = new byte[1027*9];
-        int len = 0;
-        while((len = data_input_stream.read())!=-1){
-            data_output_stream.write(bytes,0,len);
-        }
-        data_output_stream.flush();
-*/
-
-
-
-        /*
-        OutputStream file_output_stream = new FileOutputStream(local_url);
-        byte[] bytes = new byte[16*1024];
-        int count;
-        while((count = in.read(bytes)) > 0){
-            System.out.print((byte)count);
-            file_output_stream.write((byte)count);
-        }
-        file_output_stream.close();
-        in.close();
-*/
-
-
-
-
-
     }
 
 
     public static void writeToFile(String body, String requested_url) throws IOException {
-        String filename = "."+requested_url;
+        String filename = requested_url;
         OutputStream file = new FileOutputStream(filename);
         System.out.println("start write");
         file.write(body.getBytes());
